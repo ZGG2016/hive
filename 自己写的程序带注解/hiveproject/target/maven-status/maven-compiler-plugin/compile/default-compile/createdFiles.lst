@@ -1,0 +1,7 @@
+udf\GetLength.class
+udaf\CountA.class
+udf\GetLengthG.class
+jdbc\HiveJdbcClient.class
+udaf\CountA$CountAEvaluator$CountAAgg.class
+udtf\GetName.class
+udaf\CountA$CountAEvaluator.class
