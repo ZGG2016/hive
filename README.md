@@ -1,1 +1,1 @@
-Apache Hive
+Hive
