@@ -179,7 +179,7 @@ LATERAL VIEW json_tuple(string_test_name_2, 'name', 'weight') tmptable4 as remar
 
 https://zhuanlan.zhihu.com/p/589579478?utm_id=0
 
-官网描述：https://cwiki.apache.org/confluence/display/Hive/LanguageManual+DDL
+hive3.0后有所不同，见官网描述：https://cwiki.apache.org/confluence/display/Hive/LanguageManual+DDL
 
 在创建表时，只要指定使用JSONSerde解析表的文件，就会自动将JSON文件中的每一列进行解析。
 
