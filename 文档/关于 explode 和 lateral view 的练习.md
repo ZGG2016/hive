@@ -2,6 +2,8 @@
 
 [TOC]
 
+首先阅读 [官网描述](https://github.com/ZGG2016/hive/blob/master/%E5%AE%98%E6%96%B9%E6%96%87%E6%A1%A3%E8%AF%91%E6%96%87/User%20Documentation/Hive%20SQL%20Language%20Manual/Lateral%20View.md)
+
 ## 1 explode
 
 EXPLODE(col)：将 hive 一列中复杂的 Array 或者 Map 结构拆分成多行
