@@ -156,7 +156,98 @@ movie   _c1
 《Lie to me》   5              
 ```
 
--------------------------------------
-使用多个 lateral view 和 OUTER 关键字的示例 [点这里](https://github.com/ZGG2016/hive-website/blob/master/User%20Documentation/Hive%20SQL%20Language%20Manual/Lateral%20View.md) 查看
+使用多个 lateral view 示例
 
-参考：[尚硅谷hive教程](https://www.bilibili.com/video/BV1EZ4y1G7iL)
+```sql
+hive (default)> create table movie_info_2(
+              > movie string,
+              > category string,
+              > actor string)
+              > row format delimited fields terminated by "\t";
+OK
+Time taken: 0.052 seconds
+
+hive (default)> load data local inpath '/export/datas/movie_info_2.txt' into table movie_info_2;
+Loading data to table default.movie_info_2
+Table default.movie_info_2 stats: [numFiles=1, numRows=0, totalSize=148, rawDataSize=0]
+OK
+Time taken: 0.3 seconds
+
+hive (default)> select * from movie_info_2;
+OK
+movie_info_2.movie	movie_info_2.category	movie_info_2.actor
+《疑犯追踪》	悬疑,动作,科幻,剧情	a,b,c
+《Lie to me》	悬疑,警匪,动作,心理,剧情	a,c
+《战狼 2》	战争,动作,灾难	a,b
+Time taken: 0.052 seconds, Fetched: 3 row(s)
+
+hive (default)> select movie,c1 from movie_info_2 lateral view explode(split(category,",")) ctb as c1;
+OK
+movie	c1
+《疑犯追踪》	悬疑
+《疑犯追踪》	动作
+《疑犯追踪》	科幻
+《疑犯追踪》	剧情
+《Lie to me》	悬疑
+《Lie to me》	警匪
+《Lie to me》	动作
+《Lie to me》	心理
+《Lie to me》	剧情
+《战狼 2》	战争
+《战狼 2》	动作
+《战狼 2》	灾难
+Time taken: 0.05 seconds, Fetched: 12 row(s)
+
+hive (default)> select movie,c1,c2 from movie_info_2 
+              > lateral view explode(split(category,",")) ctb as c1
+              > lateral view explode(split(actor,",")) atb as c2;
+OK
+movie	c1	c2
+《疑犯追踪》	悬疑	a
+《疑犯追踪》	悬疑	b
+《疑犯追踪》	悬疑	c
+《疑犯追踪》	动作	a
+《疑犯追踪》	动作	b
+《疑犯追踪》	动作	c
+《疑犯追踪》	科幻	a
+《疑犯追踪》	科幻	b
+《疑犯追踪》	科幻	c
+《疑犯追踪》	剧情	a
+《疑犯追踪》	剧情	b
+《疑犯追踪》	剧情	c
+《Lie to me》	悬疑	a
+《Lie to me》	悬疑	c
+《Lie to me》	警匪	a
+《Lie to me》	警匪	c
+《Lie to me》	动作	a
+《Lie to me》	动作	c
+《Lie to me》	心理	a
+《Lie to me》	心理	c
+《Lie to me》	剧情	a
+《Lie to me》	剧情	c
+《战狼 2》	战争	a
+《战狼 2》	战争	b
+《战狼 2》	动作	a
+《战狼 2》	动作	b
+《战狼 2》	灾难	a
+《战狼 2》	灾难	b
+Time taken: 0.052 seconds, Fetched: 28 row(s)
+
+```
+
+使用 OUTER 关键字的示例
+
+```sql
+hive (default)> select movie,category from movie_info_2 lateral view outer explode(array()) C as a;
+OK
+movie	category
+《疑犯追踪》	悬疑,动作,科幻,剧情
+《Lie to me》	悬疑,警匪,动作,心理,剧情
+《战狼 2》	战争,动作,灾难
+Time taken: 0.046 seconds, Fetched: 3 row(s)
+
+hive (default)> select movie,category from movie_info_2 lateral view explode(array()) C as a;
+OK
+movie	category
+Time taken: 0.049 seconds
+```
