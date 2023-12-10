@@ -1,4 +1,182 @@
-# 关于 concat_ws 和 collect_set 的练习
+# 行列转换
+
+[TOC]
+
+## 几个函数
+
+concat
+```sql
+hive (default)> desc function extended concat;
+OK
+tab_name
+concat(str1, str2, ... strN) - returns the concatenation of str1, str2, ... strN or concat(bin1, bin2, ... binN) - returns the concatenation of bytes in binary data  bin1, bin2, ... binN
+Returns NULL if any argument is NULL.
+Example:
+  > SELECT concat('abc', 'def') FROM src LIMIT 1;
+  'abcdef'
+```
+
+concat_ws
+```sql
+hive (default)> desc function extended concat_ws;
+OK
+tab_name
+concat_ws(separator, [string | array(string)]+) - returns the concatenation of the strings separated by the separator.
+Example:
+  > SELECT concat_ws('.', 'www', array('facebook', 'com')) FROM src LIMIT 1;
+  'www.facebook.com'
+```
+
+collect_list  将一列中的多行合并为一行，不去重
+```sql
+hive (default)> desc function extended collect_list;
+OK
+tab_name
+collect_list(x) - Returns a list of objects with duplicates
+
+hive (default)> select * from movie_info_2;
+OK
+movie_info_2.movie	movie_info_2.category	movie_info_2.actor
+《疑犯追踪》	悬疑,动作,科幻,剧情	a,b,c
+《Lie to me》	悬疑,警匪,动作,心理,剧情	a,c
+《战狼 2》	战争,动作,灾难	a,b
+
+hive (default)> select collect_list(movie) from movie_info_2;
+Query ID = root_20231210111616_59b8f146-e683-41f3-aeca-01e9f8b5a6e4
+Total jobs = 1
+Launching Job 1 out of 1
+...
+Total MapReduce CPU Time Spent: 4 seconds 750 msec
+OK
+_c0
+["《疑犯追踪》","《Lie to me》","《战狼 2》"]
+
+```
+
+concat_set  将一列中的多行合并为一行，去重
+```sql
+hive (default)> desc function extended collect_set;
+OK
+tab_name
+collect_set(x) - Returns a set of objects with duplicate elements eliminated
+
+hive (default)> select collect_set(movie) from movie_info_2;
+Query ID = root_20231210112121_d1b62045-658d-49f4-822b-f63be0b224ff
+Total jobs = 1
+Launching Job 1 out of 1
+...
+Total MapReduce CPU Time Spent: 2 seconds 410 msec
+OK
+_c0
+["《疑犯追踪》","《Lie to me》","《战狼 2》"]
+```
+
+## 行转列：多行转单列
+
+数据源
+```
+[root@bigdata-cdh01 datas]# cat tb1.txt
+a,b,1
+a,b,2
+a,b,3
+c,d,4
+c,d,5
+c,d,6
+```
+建表
+```sql
+ive (default)> create table tb1(
+              > col1 string,
+              > col2 string,
+              > col3 string
+              > )row format delimited fields terminated by ',';
+OK
+Time taken: 0.142 seconds
+hive (default)> load data local inpath '/export/datas/tb1.txt' into table tb1;
+Loading data to table default.tb1
+Table default.tb1 stats: [numFiles=1, totalSize=36]
+OK
+Time taken: 0.492 seconds
+hive (default)> select * from tb1;
+OK
+tb1.col1	tb1.col2	tb1.col3
+a	b	1
+a	b	2
+a	b	3
+c	d	4
+c	d	5
+c	d	6
+Time taken: 0.121 seconds, Fetched: 6 row(s)
+```
+
+将tb1转换成以下格式
+```
+col1	col2	col3
+a	b	1,2,3
+c	d	4,5,6
+```
+
+两点：1. 多行转一行  2.用逗号连接
+```sql
+hive (default)> select col1, col2,
+              > concat_ws(",", collect_list(col3)) col3
+              > from tb1
+              > group by col1, col2;
+Query ID = root_20231210113030_55b970ba-1342-400f-a2fc-43a9a893ddf9
+Total jobs = 1
+Launching Job 1 out of 1
+...
+Total MapReduce CPU Time Spent: 4 seconds 660 msec
+OK
+col1	col2	col3
+a	b	1,2,3
+c	d	4,5,6
+```
+
+## 列转行：单列转多行
+
+```sql
+create table tb2 as 
+select col1, col2,
+concat_ws(",", collect_list(col3)) col3
+from tb1
+group by col1, col2;
+
+hive (default)> select * from tb2;
+OK
+tb2.col1	tb2.col2	tb2.col3
+a	b	1,2,3
+c	d	4,5,6
+```
+
+转成
+```
+tb1.col1	tb1.col2	tb1.col3
+a	b	1
+a	b	2
+a	b	3
+c	d	4
+c	d	5
+c	d	6
+```
+
+两点：1.一行转多行  2.需要拆分
+```sql
+hive (default)> select col1, col2, tcol as col3
+              > from tb2
+              > lateral view explode(split(col3,",")) tmptb as tcol;
+OK
+col1	col2	col3
+a	b	1
+a	b	2
+a	b	3
+c	d	4
+c	d	5
+c	d	6
+```
+
+
+## 练习3
 
 数据源
 
