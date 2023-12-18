@@ -324,6 +324,6 @@ alter view hive_view_9 drop partition(id=5);
 
 更多详细描述见
 
-官网：[视图语法](https://cwiki.apache.org/confluence/display/Hive/LanguageManual+DDL#LanguageManualDDL-Create/Drop/AlterView) | [视图]() | [视图分区]()
+官网：[视图语法](https://cwiki.apache.org/confluence/display/Hive/LanguageManual+DDL#LanguageManualDDL-Create/Drop/AlterView) | [视图](https://cwiki.apache.org/confluence/display/Hive/ViewDev) | [视图分区](https://cwiki.apache.org/confluence/display/Hive/PartitionedViews)
 
 翻译： [视图语法](https://github.com/ZGG2016/hive/blob/master/%E5%AE%98%E6%96%B9%E6%96%87%E6%A1%A3%E8%AF%91%E6%96%87/User%20Documentation/Hive%20SQL%20Language%20Manual/DDL%20Statements.md) | [视图](https://github.com/ZGG2016/hive/blob/master/%E5%AE%98%E6%96%B9%E6%96%87%E6%A1%A3%E8%AF%91%E6%96%87/Resources%20for%20Contributors/Hive%20Design%20Docs/Views.md) | [视图分区](https://github.com/ZGG2016/hive/blob/master/%E5%AE%98%E6%96%B9%E6%96%87%E6%A1%A3%E8%AF%91%E6%96%87/Resources%20for%20Contributors/Hive%20Design%20Docs/Partitioned%20Views.md)
