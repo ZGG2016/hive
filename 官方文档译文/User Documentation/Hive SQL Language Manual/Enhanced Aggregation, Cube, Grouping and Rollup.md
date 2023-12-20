@@ -106,7 +106,7 @@ SELECT null, null, GROUPING__ID, count(*) FROM T1
 
 > The grouping function indicates whether an expression in a GROUP BY clause is aggregated or not for a given row. The value 0 represents a column that is part of the grouping set, while the value 1 represents a column that is not part of the grouping set. 
 
-分组函数表示**是否为给定行聚合 GROUP BY 子句中的表达式**。值 0 表示属于分组集的列，而值 1 表示不属于分组集的列。【1：聚合了。0：没聚合】
+分组函数表示**是否为给定行聚合 GROUP BY 子句中的表达式**。值 0 表示属于分组集的列，而值 1 表示不属于分组集的列。
 
 > Going back to our example above, consider the following query:
 
