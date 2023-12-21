@@ -944,11 +944,14 @@ ALTER TABLE table_name SET SERDEPROPERTIES ('field.delim' = ',');
 
 ```sql
 ALTER TABLE table_name UNSET SERDEPROPERTIES ('field.delim');
-Alter Table Storage Properties
+```
+
+##### 1.5.1.5、Alter Table Storage Properties
+
+```sql
 ALTER TABLE table_name CLUSTERED BY (col_name, col_name, ...) [SORTED BY (col_name, ...)]
   INTO num_buckets BUCKETS;
 ```
-
 > These statements change the table's physical storage properties.
 
 这些语句修改表的物理存储属性。
@@ -956,8 +959,6 @@ ALTER TABLE table_name CLUSTERED BY (col_name, col_name, ...) [SORTED BY (col_na
 > NOTE: These commands will only modify Hive's metadata, and will NOT reorganize or reformat existing data. Users should make sure the actual data layout conforms with the metadata definition.
 
 注意：这些命令只会修改 Hive 的元数据，不会重新组织或重新格式化现有的数据。用户应该确保实际的数据布局与元数据定义一致。
-
-##### 1.5.1.5、Alter Table Storage Properties
 
 ##### 1.5.1.6、Alter Table Skewed or Stored as Directories
 
