@@ -206,6 +206,3 @@ GROUP BY key, value WITH ROLLUP;
 > For the second row, only the first column is being selected, which explains the count of 2.
 
 > For the third row, both the columns are being selected (and the second column happens to be null), which explains the count of 1.
-
-
-参考：[https://www.cnblogs.com/qingyunzong/p/8798987.html#_label2](https://www.cnblogs.com/qingyunzong/p/8798987.html#_label2)
