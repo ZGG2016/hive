@@ -39,6 +39,8 @@ SELECT a, b, SUM(c) FROM tab1 GROUP BY a, b GROUPING SETS ((a,b),a,b,()) | SELEC
 
 当一个列聚合的值是 null，而列本身有一些空值，这可能会冲突。
 
+【在下例中，col2本身会有null，而没有参与聚合的列也为null，所以使用Grouping__ID进行标号区分】
+
 需要某种方法来识别列中的 NULL...。`GROUPING__ID` 函数是这个问题的解决方案。
 
 > This function returns a bitvector corresponding to whether each column is present or not. For each column, a value of "1" is produced for a row in the result set if that column has been aggregated in that row, otherwise the value is "0". This can be used to differentiate when there are nulls in the data.
@@ -47,7 +49,11 @@ SELECT a, b, SUM(c) FROM tab1 GROUP BY a, b GROUPING SETS ((a,b),a,b,()) | SELEC
 
 **对于每一列，如果该列在一行被聚合，那么结果集中的这行会产生值 1，否则产生 0**。
 
-【注：比如下列语句中的`SELECT key, null, GROUPING__ID, count(*) FROM T1 GROUP BY key, null`，select语句中的第一列被用来聚合了，但第二列没有，所以是null】
+【注：
+比如下列语句中的`SELECT key, null, GROUPING__ID, count(*) FROM T1 GROUP BY key, null`，select语句中的第一列被用来聚合了，但第二列没有，所以是null
+
+在下例的结果中，没有参与聚合的列均为null
+】
 
 这可以用来区分数据中是否存在空值。
 
