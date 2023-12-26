@@ -272,20 +272,19 @@ Found 3 items
 
 ## Alter Table Skewed
 
-TODO
+
 
 ## Alter Table Not Skewed
 
-TODO
+
 
 ## Alter Table Set Skewed Location
 
-TODO
+
 
 ## Alter Table Constraints
 
 TODO
-
 
 -------------------------------
 
