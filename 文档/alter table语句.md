@@ -272,15 +272,15 @@ Found 3 items
 
 ## Alter Table Skewed
 
-
+[点这里](https://github.com/ZGG2016/hive/blob/master/%E6%96%87%E6%A1%A3/%E5%80%BE%E6%96%9C%E8%A1%A8%E5%92%8C%E5%88%97%E6%A1%B6%E8%A1%A8.md) 查看
 
 ## Alter Table Not Skewed
 
-
+[点这里](https://github.com/ZGG2016/hive/blob/master/%E6%96%87%E6%A1%A3/%E5%80%BE%E6%96%9C%E8%A1%A8%E5%92%8C%E5%88%97%E6%A1%B6%E8%A1%A8.md) 查看
 
 ## Alter Table Set Skewed Location
 
-
+[点这里](https://github.com/ZGG2016/hive/blob/master/%E6%96%87%E6%A1%A3/%E5%80%BE%E6%96%9C%E8%A1%A8%E5%92%8C%E5%88%97%E6%A1%B6%E8%A1%A8.md) 查看
 
 ## Alter Table Constraints
 
