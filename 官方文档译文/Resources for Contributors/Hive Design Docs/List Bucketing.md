@@ -285,7 +285,7 @@ Hive 需要扩展支持下面的特性：
 上面将
 
 - 关闭列桶
-- 关闭表的倾斜特性，因为一个倾斜表可以是一个正常的倾斜表，而没有倾斜特性。
+- 不会关闭表的倾斜特性，因为一个倾斜表可以是一个正常的倾斜表，而没有倾斜特性。
 
 > turn off "list bucketing"
 > not turn off the "skewed" feature from table since a "skewed" table can be a normal "skewed" table without list bucketing.
