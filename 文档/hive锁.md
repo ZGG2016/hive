@@ -60,7 +60,7 @@ Explore if it's possible to add info about what locks will be asked for to the q
 
 [官网](https://cwiki.apache.org/confluence/display/Hive/Locking)
 
-[官网部分翻译]()
+[官网部分翻译](https://github.com/ZGG2016/hive/blob/master/%E5%AE%98%E6%96%B9%E6%96%87%E6%A1%A3%E8%AF%91%E6%96%87/Resources%20for%20Contributors/Hive%20Design%20Docs/Locking.md)
 
 [帮助理解](https://cloud.tencent.com/developer/article/1043996)：
 
