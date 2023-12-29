@@ -170,7 +170,7 @@ By default, materialized views are enabled for rewriting at creation time.
 +----------+------------------+-----------------+----------------------+
 ```
 
-## alter materialized view ... rebuild
+## Alter Materialized Views ... rebuild
 
 在前面的例子中，在原表t2插入了一条数据，但是没有同步到物化视图mv中，此时就需要rebuild
 
@@ -203,7 +203,7 @@ To execute incremental maintenance, following conditions should be met:
 
 A rebuild operation acquires an exclusive write lock over the materialized view, i.e., for a given materialized view, only one rebuild operation can be executed at a given time.
 
-## 其他例子
+## 理解 ENABLE REWRITE
 
 ```sql
 create table t3(id int, name string)
@@ -219,7 +219,8 @@ TBLPROPERTIES ("transactional"="true");
 
 insert into t4 partition(deal_day='20230110') values(1,1000.10),(2,201.12),(3,223.23),(1,232.10),(2,341.12);
 
--- SET hive.auto.convert.join=false;
+-- 报错Error while compiling statement: FAILED: Execution Error, return code 1 from org.apache.hadoop.hive.ql.exec.mr.MapredLocalTask
+-- 取消map join:  SET hive.auto.convert.join=false;
 create materialized view mv2
 stored as orc 
 as 
@@ -227,11 +228,112 @@ select t3.id, t3.name, sum(price) amount
 from t3, t4
 where t3.id=t4.id and t4.deal_day='20230110' 
 group by t3.id, t3.name;
+
+-- 计算总金额
+0: jdbc:hive2://zgg-server:10000> select id, name, amount from mv2;
++-----+-------+---------+
+| id  | name  | amount  |
++-----+-------+---------+
+| 1   | aa    | 1232.2  |
+| 2   | bb    | 542.24  |
+| 3   | cc    | 223.23  |
++-----+-------+---------+
+3 rows selected (0.499 seconds)
+
+
+0: jdbc:hive2://zgg-server:10000> select id, name, sum(price) amount from t3, t4 where t3.id=t4.id and t4.deal_day='20230110' group by t3.id, t3.name;
+INFO  : Compiling command(queryId=root_20231229095844_2385a5fb-dc55-4159-a957-59d615aff2f4): select id, name, sum(price) amount from t3, t4 where t3.id=t4.id and t4.deal_day='20230110' group by t3.id, t3.name
+INFO  : Semantic Analysis Completed (retrial = false)
+INFO  : Created Hive schema: Schema(fieldSchemas:[FieldSchema(name:id, type:int, comment:null), FieldSchema(name:name, type:string, comment:null), FieldSchema(name:amount, type:double, comment:null)], properties:null)
+INFO  : Completed compiling command(queryId=root_20231229095844_2385a5fb-dc55-4159-a957-59d615aff2f4); Time taken: 0.891 seconds
+INFO  : Operation QUERY obtained 1 locks
+INFO  : Executing command(queryId=root_20231229095844_2385a5fb-dc55-4159-a957-59d615aff2f4): select id, name, sum(price) amount from t3, t4 where t3.id=t4.id and t4.deal_day='20230110' group by t3.id, t3.name
+INFO  : Completed executing command(queryId=root_20231229095844_2385a5fb-dc55-4159-a957-59d615aff2f4); Time taken: 0.268 seconds
++-----+-------+---------+
+| id  | name  | amount  |
++-----+-------+---------+
+| 1   | aa    | 1232.2  |
+| 2   | bb    | 542.24  |
+| 3   | cc    | 223.23  |
++-----+-------+---------+
+3 rows selected (1.283 seconds)
+
+
+0: jdbc:hive2://zgg-server:10000> Explain select id, name, sum(price) amount from t3, t4 where t3.id=t4.id and t4.deal_day='20230110' group by t3.id, t3.name;
++----------------------------------------------------+
+|                      Explain                       |
++----------------------------------------------------+
+| STAGE DEPENDENCIES:                                |
+|   Stage-0 is a root stage                          |
+|                                                    |
+| STAGE PLANS:                                       |
+|   Stage: Stage-0                                   |
+|     Fetch Operator                                 |
+|       limit: -1                                    |
+|       Processor Tree:                              |
+|         TableScan                                  |
+|           alias: default.mv2   【√】                 |
+|           Statistics: Num rows: 3 Data size: 294 Basic stats: COMPLETE Column stats: COMPLETE |
+|           Select Operator                          |
+|             expressions: id (type: int), name (type: string), amount (type: double) |
+|             outputColumnNames: _col0, _col1, _col2 |
+|             Statistics: Num rows: 3 Data size: 294 Basic stats: COMPLETE Column stats: COMPLETE |
+|             ListSink                               |
+|                                                    |
++----------------------------------------------------+
+17 rows selected (1.207 seconds)
+
+
+create materialized view mv3
+DISABLE REWRITE
+stored as orc 
+as 
+select sum(price) amount
+from t4
+where deal_day='20230110';
+
+Explain select sum(price) amount from t4 where deal_day='20230110';
+
+-- 执行了 mr job
+0: jdbc:hive2://zgg-server:10000> select sum(price) amount from t4 where deal_day='20230110';
+INFO  : Query ID = root_20231229095806_adb7e9e8-bc3e-4177-8603-c513095dc222
+INFO  : Total jobs = 1
+...
++----------+
+|  amount  |
++----------+
+| 1997.67  |
++----------+
+1 row selected (34.734 seconds)
+
+create materialized view mv4
+stored as orc 
+as 
+select sum(price) amount
+from t4
+where deal_day='20230110';
+
+-- 未执行 mr job
+0: jdbc:hive2://zgg-server:10000> select sum(price) amount from t4 where deal_day='20230110';
+INFO  : Compiling command(queryId=root_20231229100323_79bb8519-3175-4c99-aac5-6004434bc464): select sum(price) amount from t4 where deal_day='20230110'
+INFO  : Semantic Analysis Completed (retrial = false)
+INFO  : Created Hive schema: Schema(fieldSchemas:[FieldSchema(name:amount, type:double, comment:null)], properties:null)
+INFO  : Completed compiling command(queryId=root_20231229100323_79bb8519-3175-4c99-aac5-6004434bc464); Time taken: 0.164 seconds
+INFO  : Operation QUERY obtained 1 locks
+INFO  : Executing command(queryId=root_20231229100323_79bb8519-3175-4c99-aac5-6004434bc464): select sum(price) amount from t4 where deal_day='20230110'
+INFO  : Completed executing command(queryId=root_20231229100323_79bb8519-3175-4c99-aac5-6004434bc464); Time taken: 0.105 seconds
++----------+
+|  amount  |
++----------+
+| 1997.67  |
++----------+
+1 row selected (0.42 seconds)
 ```
+
 -------------------------------
 
 更多详细描述见
 
 官网：[物化视图语法](https://cwiki.apache.org/confluence/display/Hive/LanguageManual+DDL#LanguageManualDDL-Create/Drop/AlterMaterializedView) | [物化视图](https://cwiki.apache.org/confluence/display/Hive/Materialized+views) 
 
-翻译： [物化视图语法](https://github.com/ZGG2016/hive/blob/master/%E5%AE%98%E6%96%B9%E6%96%87%E6%A1%A3%E8%AF%91%E6%96%87/User%20Documentation/Hive%20SQL%20Language%20Manual/DDL%20Statements.md) | [物化视图]() 
+翻译： [物化视图语法](https://github.com/ZGG2016/hive/blob/master/%E5%AE%98%E6%96%B9%E6%96%87%E6%A1%A3%E8%AF%91%E6%96%87/User%20Documentation/Hive%20SQL%20Language%20Manual/DDL%20Statements.md) | [物化视图](https://github.com/ZGG2016/hive/blob/master/%E5%AE%98%E6%96%B9%E6%96%87%E6%A1%A3%E8%AF%91%E6%96%87/User%20Documentation/Materialized%20views.md) 
