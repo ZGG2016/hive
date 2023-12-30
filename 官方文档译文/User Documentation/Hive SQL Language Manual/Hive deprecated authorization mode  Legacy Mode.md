@@ -1,0 +1,1 @@
+# Hive deprecated authorization mode / Legacy Mode
