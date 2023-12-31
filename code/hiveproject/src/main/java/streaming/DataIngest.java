@@ -1,9 +1,16 @@
 package streaming;
 
+import org.apache.hadoop.hive.conf.HiveConf;
 import org.apache.hive.hcatalog.streaming.*;
 
 import java.util.ArrayList;
-// hive1.1.0版本
+/*
+create table alerts ( id int , msg string )
+partitioned by (continent string, country string)
+clustered by (id) into 5 buckets
+stored as orc
+tblproperties("transactional"="true");
+ */
 public class DataIngest {
     public static void main(String[] args) throws StreamingException, InterruptedException, ClassNotFoundException {
         //-------   MAIN THREAD  ------- //
@@ -14,10 +21,17 @@ public class DataIngest {
         partitionVals.add("India");
         String serdeClass = "org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe";
         String[] fieldNames = {"id", "msg"};
-        HiveEndPoint hiveEP = new HiveEndPoint("thrift://zgg-server:9083", dbName, tblName, partitionVals);
+        HiveEndPoint hiveEP = new HiveEndPoint("thrift://bigdata-cdh01.itcast.cn:9083", dbName, tblName, partitionVals);
+
+        HiveConf hiveConf = new HiveConf();
+        hiveConf.setVar(HiveConf.ConfVars.DYNAMICPARTITIONINGMODE, "nonstrict");
+        hiveConf.setVar(HiveConf.ConfVars.HIVE_TXN_MANAGER, "org.apache.hadoop.hive.ql.lockmgr.DbTxnManager");
+        hiveConf.setVar(HiveConf.ConfVars.HIVE_EXECUTION_ENGINE, "mr");
+        hiveConf.setBoolVar(HiveConf.ConfVars.HIVE_SUPPORT_CONCURRENCY, true);
+        hiveConf.setBoolVar(HiveConf.ConfVars.METASTORE_EXECUTE_SET_UGI, true);
 
         //-------   Thread 1  -------//
-        StreamingConnection connection = hiveEP.newConnection(true);
+        StreamingConnection connection = hiveEP.newConnection(true, hiveConf);
         DelimitedInputWriter writer =
                 new DelimitedInputWriter(fieldNames,",", hiveEP);
         TransactionBatch txnBatch = connection.fetchTransactionBatch(10, writer);
@@ -59,38 +73,37 @@ public class DataIngest {
         }
         connection.close();
 
-
         //-------   Thread 2  -------//
-        StreamingConnection connection2 = hiveEP.newConnection(true);
-        DelimitedInputWriter writer2 =
-                new DelimitedInputWriter(fieldNames,",", hiveEP);
-        TransactionBatch txnBatch2= connection.fetchTransactionBatch(10, writer2);
-
-        ///// Batch 1 - First TXN
-        txnBatch2.beginNextTransaction();
-        txnBatch2.write("21,Venkat Ranganathan".getBytes());
-        txnBatch2.write("22,Bowen Zhang".getBytes());
-        txnBatch2.commit();
-
-        ///// Batch 1 - Second TXN
-        txnBatch2.beginNextTransaction();
-        txnBatch2.write("23,Venkatesh Seetaram".getBytes());
-        txnBatch2.write("24,Deepesh Khandelwal".getBytes());
-        txnBatch2.commit();
-
-        txnBatch2.close();
-        connection.close();
-
-        txnBatch = connection.fetchTransactionBatch(10, writer);
-
-        ///// Batch 2 - First TXN
-        txnBatch.beginNextTransaction();
-        txnBatch.write("26,David Schorow".getBytes());
-        txnBatch.write("27,Sushant Sowmyan".getBytes());
-        txnBatch.commit();
-
-        txnBatch2.close();
-        connection2.close();
+//        StreamingConnection connection2 = hiveEP.newConnection(true);
+//        DelimitedInputWriter writer2 =
+//                new DelimitedInputWriter(fieldNames,",", hiveEP);
+//        TransactionBatch txnBatch2= connection.fetchTransactionBatch(10, writer2);
+//
+//        ///// Batch 1 - First TXN
+//        txnBatch2.beginNextTransaction();
+//        txnBatch2.write("21,Venkat Ranganathan".getBytes());
+//        txnBatch2.write("22,Bowen Zhang".getBytes());
+//        txnBatch2.commit();
+//
+//        ///// Batch 1 - Second TXN
+//        txnBatch2.beginNextTransaction();
+//        txnBatch2.write("23,Venkatesh Seetaram".getBytes());
+//        txnBatch2.write("24,Deepesh Khandelwal".getBytes());
+//        txnBatch2.commit();
+//
+//        txnBatch2.close();
+//        connection.close();
+//
+//        txnBatch = connection.fetchTransactionBatch(10, writer);
+//
+//        ///// Batch 2 - First TXN
+//        txnBatch.beginNextTransaction();
+//        txnBatch.write("26,David Schorow".getBytes());
+//        txnBatch.write("27,Sushant Sowmyan".getBytes());
+//        txnBatch.commit();
+//
+//        txnBatch2.close();
+//        connection2.close();
 
     }
 }
