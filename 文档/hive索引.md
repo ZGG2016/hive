@@ -4,7 +4,7 @@
 
 Create then build, show formatted (with column names), and drop index:
 
-```
+```sql
 hive (tags_dat)> create index tbl_orders_2_index on table tbl_orders_2(id) as 'COMPACT' WITH DEFERRED REBUILD;
 OK
 Time taken: 0.328 seconds
@@ -52,7 +52,7 @@ Time taken: 0.196 seconds
 
 Create bitmap index, build, show, and drop:
 
-```
+```sql
 hive (tags_dat)> create index tbl_orders_2_index on table tbl_orders_2(id) as 'bitmap' WITH DEFERRED REBUILD;
 OK
 Time taken: 0.162 seconds
@@ -71,7 +71,7 @@ Time taken: 0.037 seconds, Fetched: 4 row(s)
 
 Create index in a new table:  【idx_tab_name字段】
 
-```
+```sql
 hive (tags_dat)> create index tbl_orders_2_index on table tbl_orders_2(id) as 'bitmap' WITH DEFERRED REBUILD in table tbl_orders_2_index_table;
 OK
 Time taken: 0.125 seconds
