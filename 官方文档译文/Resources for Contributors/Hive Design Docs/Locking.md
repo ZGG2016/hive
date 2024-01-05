@@ -20,7 +20,7 @@ As the name suggests, multiple shared locks can be acquired at the same time, wh
 
 The compatibility matrix is as follows:
 
-![lock](./lock.png)
+![lock](./images/lock.png)
 
 For some operations, locks are hierarchical in nature -- for example for some partition operations, the table is also locked (to make sure that the table cannot be dropped while a new partition is being created).
 
@@ -44,7 +44,7 @@ A 'S' lock on table and relevant partition is acquired when a read is being perf
 
 Based on this, the lock acquired for an operation is as follows:
 
-![lock2](./lock2.png)
+![lock2](./images/lock2.png)
 
 In order to avoid deadlocks, a very simple scheme is proposed here. All the objects to be locked are sorted lexicographically, and the required mode lock is acquired. Note that in some cases, the list of objects may not be known -- for example in case of dynamic partitions, the list of partitions being modified is not known at compile time -- so, the list is generated conservatively. Since the number of partitions may not be known, an exclusive lock is supposed to be taken (but currently not due to [HIVE-3509](https://issues.apache.org/jira/browse/HIVE-3509) bug) on the table, or the prefix that is known.
 

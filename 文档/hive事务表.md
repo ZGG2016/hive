@@ -198,3 +198,9 @@ WHEN NOT MATCHED THEN INSERT VALUES (S.ID, S.TranValue, 'merge_insert', S.tran_d
 一旦合并完成，重新检查数据就会显示数据已经按照预期进行了合并。
 
 第 1 行没有改变；第 4 行被删除；第 7 行被更新，第 11 行被插入。第 8 行被移到了一个新的分区。
+
+## hive4.0创建事务表
+
+```sql
+0: jdbc:hive2://localhost:10000> CREATE TRANSACTIONAL TABLE transactional_table_test(key string, value string) PARTITIONED BY(ds string) STORED AS ORC;
+```

@@ -48,7 +48,7 @@ LLAP 也称为 Live Long and Process，它提供了一种混合执行模型。
 
 Tez AM 负责整体执行。查询的初始阶段被推入 LLAP。在 reduce 阶段，大的 shuffles 是在单独的容器中进行的。多个查询和应用程序可以并发访问 LLAP。
 
-![LLAP_diagram.png](./LLAP_diagram.png)
+![LLAP_diagram.png](./images/LLAP_diagram.png)
 
 ## 2、Persistent Daemon
 
