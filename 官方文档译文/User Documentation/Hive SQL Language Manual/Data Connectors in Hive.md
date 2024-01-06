@@ -26,7 +26,9 @@ With [JDBC Storage Handlers](https://cwiki.apache.org/confluence/display/Hive/JD
 
 Data connectors allow users to map a database/schema in the remote datasource to a Hive database. Such databases are referred to as REMOTE databases in hive.
 
-       CREATE REMOTE DATABASE postgres_db1 USING <connectorName> WITH DBPROPERTIES ('connector.remoteDbName'='db1');
+```sql
+CREATE REMOTE DATABASE postgres_db1 USING <connectorName> WITH DBPROPERTIES ('connector.remoteDbName'='db1');
+```
 
 - All the tables within a mapped database (db1) are automatically visible from Hive. The metadata for these tables are not persisted in Hive metastore's backend. They are retrieved at runtime via a live connector.
 
@@ -40,19 +42,26 @@ Data connectors allow users to map a database/schema in the remote datasource to
 
 1. Create a connector first.
 
-        CREATE CONNECTOR pg_local TYPE 'postgres' URL 'jdbc:postgresql://localhost:5432' WITH DCPROPERTIES ("hive.sql.dbcp.username"="postgres", "hive.sql.dbcp.password"="postgres");
+```sql
+CREATE CONNECTOR pg_local TYPE 'postgres' URL 'jdbc:postgresql://localhost:5432' WITH DCPROPERTIES ("hive.sql.dbcp.username"="postgres", "hive.sql.dbcp.password"="postgres");
+```
 
 2. Create a database of type REMOTE in hive using the connector from Step1.   This maps a remote database named "hive_hms_testing" to a hive database named "pg_hive_testing" in hive.
-         
-        CREATE REMOTE DATABASE pg_hive_testing USING pg_local WITH DBPROPERTIES ("connector.remoteDbName"="hive_hms_testing");
 
-        // USING keystore instead of cleartext passwords in DCPROPERTIES
-        CREATE CONNECTOR pg_local_ks TYPE 'postgres' URL 'jdbc:postgresql://localhost:5432/hive_hms_testing' WITH DCPROPERTIES("hive.sql.dbcp.username"="postgres","hive.sql.dbcp.password.keystore"="jceks://app/local/hive/secrets.jceks" "hive.sql.dbcp.password.key"="postgres.credential");
-        CREATE REMOTE DATABASE pg_ks_local USING pg_local_ks("connector.remoteDbName"="hive_hms_testing");
-   
+```sql       
+CREATE REMOTE DATABASE pg_hive_testing USING pg_local WITH DBPROPERTIES ("connector.remoteDbName"="hive_hms_testing");
+
+// USING keystore instead of cleartext passwords in DCPROPERTIES
+CREATE CONNECTOR pg_local_ks TYPE 'postgres' URL 'jdbc:postgresql://localhost:5432/hive_hms_testing' WITH DCPROPERTIES("hive.sql.dbcp.username"="postgres","hive.sql.dbcp.password.keystore"="jceks://app/local/hive/secrets.jceks" "hive.sql.dbcp.password.key"="postgres.credential");
+
+CREATE REMOTE DATABASE pg_ks_local USING pg_local_ks("connector.remoteDbName"="hive_hms_testing");
+```
+
 3. Use the tables in REMOTE database much like the JDBC-storagehandler based tables in hive. One big difference is that the metadata for these tables are never persisted in hive. Currently, create/alter/drop table DDLs are not supported in REMOTE databases. 
 
-        USE pg_hive_testing;
-        SHOW TABLES;
-        DESCRIBE [formatted] <tablename>;
-        SELECT <col1> from <tablename> where <filter1> and <filter2>;
+```sql
+USE pg_hive_testing;
+SHOW TABLES;
+DESCRIBE [formatted] <tablename>;
+SELECT <col1> from <tablename> where <filter1> and <filter2>;
+```

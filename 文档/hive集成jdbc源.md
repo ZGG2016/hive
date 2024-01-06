@@ -1,4 +1,4 @@
-# jdbc storage handler
+# hive集成jdbc源
 
 [TOC]
 
@@ -259,6 +259,6 @@ TBLPROPERTIES (
 
 --------------------
 
-[官网](hhttps://cwiki.apache.org/confluence/display/Hive/JDBC+Storage+Handler)
+[官网](https://cwiki.apache.org/confluence/display/Hive/JDBC+Storage+Handler)
 
-[官网翻译](https://github.com/ZGG2016/hive/blob/master/%E5%AE%98%E6%96%B9%E6%96%87%E6%A1%A3%E8%AF%91%E6%96%87/User%20Documentation/Hive%20SQL%20Language%20Manual/DDL%20Statements.md#152alter-partition)
+[官网翻译](https://github.com/ZGG2016/hive/blob/master/%E5%AE%98%E6%96%B9%E6%96%87%E6%A1%A3%E8%AF%91%E6%96%87/Resources%20for%20Contributors/Hive%20Design%20Docs/JDBC%20Storage%20Handler.md)
