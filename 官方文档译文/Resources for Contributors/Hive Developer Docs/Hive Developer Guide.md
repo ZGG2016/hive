@@ -266,7 +266,7 @@ ObjectInspector 不仅告诉我们对象的结构，还提供了访问对象内�
 
 通过这种注册机制添加了以下映射:
 
-STORED AS AVRO / STORED AS AVROFILE
+STORED AS AVRO / STORED AS AVROFILE 等价于
 
 	ROW FORMAT SERDE
 	  'org.apache.hadoop.hive.serde2.avro.AvroSerDe'
@@ -275,7 +275,7 @@ STORED AS AVRO / STORED AS AVROFILE
 	  OUTPUTFORMAT
 	  'org.apache.hadoop.hive.ql.io.avro.AvroContainerOutputFormat'
 
-STORED AS ORC / STORED AS ORCFILE
+STORED AS ORC / STORED AS ORCFILE  等价于
 
 	ROW FORMAT SERDE
 	  'org.apache.hadoop.hive.ql.io.orc.OrcSerde'
@@ -284,7 +284,7 @@ STORED AS ORC / STORED AS ORCFILE
 	  OUTPUTFORMAT
 	  'org.apache.hadoop.hive.ql.io.orc.OrcOutputFormat'
 
-STORED AS PARQUET / STORED AS PARQUETFILE
+STORED AS PARQUET / STORED AS PARQUETFILE  等价于
 
 	ROW FORMAT SERDE
 	  'org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe'
@@ -293,21 +293,21 @@ STORED AS PARQUET / STORED AS PARQUETFILE
 	  OUTPUTFORMAT
 	  'org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat'
 
-STORED AS RCFILE
+STORED AS RCFILE  等价于
 
 	STORED AS INPUTFORMAT
 	  'org.apache.hadoop.hive.ql.io.RCFileInputFormat'
 	  OUTPUTFORMAT
 	  'org.apache.hadoop.hive.ql.io.RCFileOutputFormat'
 
-STORED AS SEQUENCEFILE	
+STORED AS SEQUENCEFILE	 等价于
 
 	STORED AS INPUTFORMAT
 	  'org.apache.hadoop.mapred.SequenceFileInputFormat'
 	  OUTPUTFORMAT
 	  'org.apache.hadoop.mapred.SequenceFileOutputFormat'
 
-STORED AS TEXTFILE	
+STORED AS TEXTFILE    等价于	
 
 	STORED AS INPUTFORMAT
 	  'org.apache.hadoop.mapred.TextInputFormat'
