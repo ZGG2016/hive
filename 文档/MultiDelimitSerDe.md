@@ -27,3 +27,4 @@ hive@8361ca1351e2:/opt/hive/test-data$ cat tb_mdserde.txt
 +----------------+-----------------------+---------------------+
 ```
 
+[更多信息](https://github.com/ZGG2016/hive/blob/master/%E5%AE%98%E6%96%B9%E6%96%87%E6%A1%A3%E8%AF%91%E6%96%87/User%20Documentation/MultiDelimitSerDe.md)

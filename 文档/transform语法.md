@@ -61,9 +61,7 @@ import datetime
 
 for line in sys.stdin:
   user_id,item_id,rating,rate_time = line.strip().split("\t")
-
-  weekday = datetime.datetime.fromtimestamp(float(rate_time)).isoweekday()
-  print("\t".join([userid, item_id, rating, str(weekday)]))
+  print("\t".join([userid, item_id, rating+'point', rate_time]))
 ```
 
 
