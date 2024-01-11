@@ -2,11 +2,9 @@
 
 [TOC]
 
-## explain
+[explain](https://github.com/ZGG2016/hive/blob/master/%E6%96%87%E6%A1%A3/explain%E6%89%A7%E8%A1%8C%E8%AE%A1%E5%88%92%E5%88%86%E6%9E%90.md)
 
-使用 explain 查看执行计划，分析执行流程
-
-[点这里](https://github.com/ZGG2016/knowledgesystem/blob/master/03%20%E5%A4%A7%E6%95%B0%E6%8D%AE/02%20Hive/explain%20%E6%89%A7%E8%A1%8C%E8%AE%A1%E5%88%92%E5%88%86%E6%9E%90.md) 查看详情
+[fetch 抓取]()
 
 ## 本地模式
 
@@ -53,146 +51,6 @@ _c0
 Time taken: 6.477 seconds, Fetched: 1 row(s)
 ```
 
-## fetch 抓取
-
-Fetch 抓取是指，Hive 中对某些情况的查询可以不必使用 MapReduce 计算，简单地读取表对应的存储目录下的文件，然后输出查询结果到控制台。
-
-在 `hive-default.xml.template` 文件中 `hive.fetch.task.conversion` 默认是 more
-
-```xml
-<property>
-    <name>hive.fetch.task.conversion</name>
-    <value>more</value>
-    <description>
-      Expects one of [none, minimal, more].
-      Some select queries can be converted to single FETCH task minimizing latency.
-      Currently the query should be single sourced not having any subquery and should not have
-      any aggregations or distincts (which incurs RS), lateral views and joins.
-      0. none : disable hive.fetch.task.conversion
-      1. minimal : SELECT STAR, FILTER on partition columns, LIMIT only
-      2. more    : SELECT, FILTER, LIMIT only (support TABLESAMPLE and virtual columns)
-    </description>
-  </property>
-```
-
-测试表
-
-```sql
-hive (default)> desc test2;
-OK
-col_name        data_type       comment
-name                    string                                      
-friends                 array<string>                               
-children                map<string,int>                             
-address                 struct<street:string,city:string>                           
-hive (default)> desc dept_partition;
-OK
-col_name        data_type       comment
-deptno                  int                                         
-dname                   string                                      
-loc                     string                                      
-day                     string                                      
-                 
-# Partition Information          
-# col_name              data_type               comment             
-day                     string   
-```
-
-none: 禁用抓取，只有用到HDFS数据的，都要走MR
-
-```sql
-hive (default)> set hive.fetch.task.conversion=none;
-
-hive (default)> select * from dept_partition;
-Query ID = root_20220909031305_97b9e36a-ae3a-4a02-868e-9a4edb2b2729
-Total jobs = 1
-Launching Job 1 out of 1
-
-hive (default)> select deptno from dept_partition where loc=1700;
-Query ID = root_20220909031412_eae7abd7-52aa-4262-9113-48d10eaa95aa
-Total jobs = 1
-Launching Job 1 out of 1
-```
-
-minimal: `SELECT *`, 在分区列上过滤, LIMIT
-
-```sql
-hive (default)> set hive.fetch.task.conversion=minimal;
-
-# SELECT STAR
-hive (default)> select * from test2;
-OK
-test2.name      test2.friends   test2.children  test2.address
-songsong        ["bingbing","lili"]     {"xiao song":18,"xiaoxiao song":19}     {"street":"hui long guan","city":"beijing"}
-yangyang        ["caicai","susu"]       {"xiao yang":18,"xiaoxiao yang":19}     {"street":"chao yang","city":"beijing"}
-
-# FILTER on partition columns
-hive (default)> select deptno from dept_partition where day='20220401';
-OK
-deptno
-10
-20
-
-hive (default)> select * from test2 where name='songsong'; 
-Query ID = root_20220909031901_f9d9fab3-e1c9-4176-b5bd-02411aae2d4a
-Total jobs = 1
-Launching Job 1 out of 1
-....
-
-# LIMIT
-hive (default)> select deptno from dept_partition limit 2;
-OK
-deptno
-10
-20
-
-# virtual columns【？？】
-hive (default)> select name,BLOCK__OFFSET__INSIDE__FILE from test2;
-OK
-name    block__offset__inside__file
-songsong        0
-yangyang        75
-```
-
-more: SELECT, FILTER, LIMIT only (support TABLESAMPLE and virtual columns)
-
-```sql
-hive (default)> set hive.fetch.task.conversion=more;
-
-# SELECT
-hive (default)> select * from test2;
-OK
-test2.name      test2.friends   test2.children  test2.address
-songsong        ["bingbing","lili"]     {"xiao song":18,"xiaoxiao song":19}     {"street":"hui long guan","city":"beijing"}
-yangyang        ["caicai","susu"]       {"xiao yang":18,"xiaoxiao yang":19}     {"street":"chao yang","city":"beijing"}
-
-
-# FILTER
-hive (default)> select deptno from dept_partition where day='20220401';
-OK
-deptno
-10
-20
-
-hive (default)> select * from test2 where name='songsong'; 
-OK
-test2.name      test2.friends   test2.children  test2.address
-songsong        ["bingbing","lili"]     {"xiao song":18,"xiaoxiao song":19}     {"street":"hui long guan","city":"beijing"}
-
-# LIMIT
-hive (default)> select deptno from dept_partition limit 2;
-OK
-deptno
-10
-20
-
-# virtual columns
-hive (default)> select name,BLOCK__OFFSET__INSIDE__FILE from test2;
-OK
-name    block__offset__inside__file
-songsong        0
-yangyang        75
-```
 
 ## 大小表join
 
