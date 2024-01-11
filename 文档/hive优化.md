@@ -4,53 +4,11 @@
 
 [explain](https://github.com/ZGG2016/hive/blob/master/%E6%96%87%E6%A1%A3/explain%E6%89%A7%E8%A1%8C%E8%AE%A1%E5%88%92%E5%88%86%E6%9E%90.md)
 
-[fetch 抓取]()
+[fetch](https://github.com/ZGG2016/hive/blob/master/%E6%96%87%E6%A1%A3/fetch%E6%8A%93%E5%8F%96.md)
 
-## 本地模式
+[本地模式](https://github.com/ZGG2016/hive/blob/master/%E6%96%87%E6%A1%A3/%E6%9C%AC%E5%9C%B0%E6%A8%A1%E5%BC%8F.md)
 
-当 Hive 的输入数据量是非常小时，触发执行任务消耗的时间可能
-会比实际 job 的执行时间要多的多，此时，Hive 可以通过本地模式在单台机器上处理所有的任务。
-
-```
-//开启本地模式 mr
-set hive.exec.mode.local.auto=true; 
-
-//设置 local mr 的最大输入数据量，当输入数据量小于这个值时采用 local mr 的方式，默认
-为 134217728，即 128M
-set hive.exec.mode.local.auto.inputbytes.max=50000000;
-
-//设置 local mr 的最大输入文件个数，当输入文件个数小于这个值时采用 local mr 的方式，默
-认为 4
-set hive.exec.mode.local.auto.input.files.max=10;
-```
-
-```sql
-hive (default)> select count(*) from emp;
-....
-Ended Job = job_1662688244068_0008
-MapReduce Jobs Launched: 
-Stage-Stage-1: Map: 1  Reduce: 1   Cumulative CPU: 5.12 sec   HDFS Read: 14035 HDFS Write: 102 SUCCESS
-Total MapReduce CPU Time Spent: 5 seconds 120 msec
-OK
-_c0
-14
-Time taken: 33.836 seconds, Fetched: 1 row(s)
-```
-
-```sql
-hive (default)> set hive.exec.mode.local.auto=true;
-hive (default)> select count(*) from emp;
-....
-Ended Job = job_local1830996877_0001
-MapReduce Jobs Launched: 
-Stage-Stage-1:  HDFS Read: 1312 HDFS Write: 102 SUCCESS
-Total MapReduce CPU Time Spent: 0 msec
-OK
-_c0
-14
-Time taken: 6.477 seconds, Fetched: 1 row(s)
-```
-
+[map端聚合]()
 
 ## 大小表join
 
@@ -153,20 +111,8 @@ SELECT /*+ STREAMTABLE(a) */ a.val, b.val, c.val FROM a JOIN b ON (a.key = b.key
 
 更多join优化点 [这里](https://github.com/ZGG2016/hive-website/blob/master/User%20Documentation/Hive%20SQL%20Language%20Manual/Joins.md)
 
-## map端聚合
 
-设置如下参数
 
-```
-# 是否在 Map 端进行聚合，默认为 True
-set hive.map.aggr = true
-
-# 在 Map 端进行聚合操作的条目数目
-set hive.groupby.mapaggr.checkinterval = 100000
-
-# 有数据倾斜的时候进行负载均衡（默认是 false）
-set hive.groupby.skewindata = true
-```
 
 ## groupby代替distinct去重
 
