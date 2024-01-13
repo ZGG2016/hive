@@ -353,9 +353,9 @@ select /*+MAPJOIN(smallTableTwo)*/ idOne, idTwo, value FROM
 
 不支持上述查询。如果没有 mapjoin hint，上面的查询将作为 2 个 map-only jobs 执行。如果用户事先知道输入足够小，可以装入内存，那么可以使用以下可配置参数来确保查询在单个 map-reduce job中执行。
 
-- `hive.auto.convert.join.noconditionaltask` ：Hive 是否会根据输入文件大小优化普通 join 到 mapjoin 的转换。如果这个参数是开的，并且，the sum of size for n-1 of the tables/partitions for a n-way join 小于指定的大小，那么该 join 将直接转换为 mapjoin(没有条件任务)。
+- `hive.auto.convert.join.noconditionaltask` ：Hive 是否会根据输入文件大小优化普通 join 到 mapjoin 的转换。如果这个参数是开的，并且，假设参与join的表(或分区)有N个，如果打开这个参数，并且有N-1个表(或分区)的大小总和 小于指定的大小，那么该 join 将直接转换为 mapjoin(没有条件任务)。
 
-- `hive.auto.convert.join.noconditionaltask.size`：如果`hive.auto.convert.join.noconditionaltask`是关闭的时，此参数不生效。但是，如果它是开启的，并且the sum of size for n-1 of the tables/partitions for a n-way join 小于这个值，那么该 join 将直接转换为 mapjoin(没有条件任务)。。默认值是 10MB。
+- `hive.auto.convert.join.noconditionaltask.size`：如果`hive.auto.convert.join.noconditionaltask`是关闭的时，此参数不生效。但是，如果它是开启的，并且假设参与join的表(或分区)有N个，如果打开这个参数，并且有N-1个表(或分区)的大小总和 小于这个值，那么该 join 将直接转换为 mapjoin(没有条件任务)。。默认值是 10MB。
 
 > hive.auto.convert.join.noconditionaltask - Whether Hive enable the optimization about converting common join into mapjoin based on the input file size. If this paramater is on, and the sum of size for n-1 of the tables/partitions for a n-way join is smaller than the specified size, the join is directly converted to a mapjoin (there is no conditional task).
 
