@@ -196,7 +196,7 @@ where t_hour = 8 and d_year = 2002
 
 > If [hive.auto.convert.join](https://cwiki.apache.org/confluence/display/Hive/Configuration+Properties#ConfigurationProperties-hive.auto.convert.join) is set to true the optimizer not only converts joins to mapjoins but also merges MJ* patterns as much as possible.
 
-**如果 `hive.auto.convert.join` 设为了 true，优化器不仅将 joins 转换为 mapjoins，而且尽可能的合并 `MJ*` 模式**。【？？？】
+**如果 `hive.auto.convert.join` 设为了 true，优化器不仅将 joins 转换为 mapjoins，而且尽可能的合并 `MJ*` 模式**。
 
 #### 2.3.2、Optimize Auto Join Conversion
 
