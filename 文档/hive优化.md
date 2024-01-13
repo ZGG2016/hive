@@ -8,34 +8,14 @@
 
 [本地模式](https://github.com/ZGG2016/hive/blob/master/%E6%96%87%E6%A1%A3/%E6%9C%AC%E5%9C%B0%E6%A8%A1%E5%BC%8F.md)
 
-[map端聚合]()
+[map端聚合](https://github.com/ZGG2016/hive/blob/master/%E6%96%87%E6%A1%A3/map%E7%AB%AF%E8%81%9A%E5%90%88.md)
 
-## 大小表join
+[大小表join-mapjoin]()
 
-执行 mapjoin(MAPJION会把小表全部加载到内存中，), 设置如下属性
+[大大表join-smbjoin]()
 
-```
-设置自动选择 Mapjoin
-set hive.auto.convert.join = true; 默认为 true
+[分区分桶](https://github.com/ZGG2016/hive/blob/master/%E6%96%87%E6%A1%A3/%E5%88%86%E5%8C%BA%E5%88%86%E6%A1%B6.md)
 
-大表小表的阈值设置（默认 25M 以下认为是小表）
-set hive.mapjoin.smalltable.filesize = 25000000;
-
-hive.auto.convert.join.noconditionaltask
-```
-
-## 大表大表join
-
-- 1. 过滤掉null
-- 2. 将null转换
-- 3. SMB join: 通过建分桶表实现，并开启如下属性
-
-
-```
-set hive.optimize.bucketmapjoin = true;
-set hive.optimize.bucketmapjoin.sortedmerge = true;
-set hive.input.format=org.apache.hadoop.hive.ql.io.BucketizedHiveInputFormat;
-```
 
 ## join数据倾斜优化
 
@@ -58,60 +38,6 @@ set hive.optimize.skewjoin=false;
 ```
 set hive.skewjoin.mapjoin.map.tasks=10000;
 ```
-
-## left semi join代替in/exists 操作
-
-```sql
-select a.id, a.name from a where a.id in (select b.id from b);
-
-select a.id, a.name from a where exists (select id from b where a.id = b.id);
-
--- 可以使用 join 来改写：
-select a.id, a.name from a join b on a.id = b.id;
-
--- 应该转换成 left semi join 实现
-select a.id, a.name from a left semi join b on a.id = b.id;
-```
-
-## 多表join
-
-如果在 join 子句中使用每个表的相同的列，那么 Hive 将多表 join 转成一个 map/reduce job。如下
-
-```sql
-SELECT a.val, b.val, c.val FROM a JOIN b ON (a.key = b.key1) JOIN c ON (c.key = b.key1)
-```
-
-下面的语句则是被转成两个 map/reduce job，因为 b 的 key1 列在第一个 join 条件中使用，b 的 key2 列在第二个 join 条件中使用。第一个 map/reduce job 将 a 和 b join，然后在第二个 map/reduce job 中结果再和 c join。
-
-```sql
-SELECT a.val, b.val, c.val FROM a JOIN b ON (a.key = b.key1) JOIN c ON (c.key = b.key2)
-```
-
-## join中的表顺序
-
-在 join 的每个 map/reduce 阶段，序列中的最后一个表通过 reducers 流动，而其他表被缓存。
-
-```sql
-SELECT a.val, b.val, c.val FROM a JOIN b ON (a.key = b.key1) JOIN c ON (c.key = b.key1)
-```
-
-一个 map/reduce job 中连接所有的三个表，表 a 和表 b 的键的特定值被缓存在 reducers 的内存中。然后，对于从 c 检索到的每一行，使用缓存的行进行计算连接。同样的
-
-```sql
-SELECT a.val, b.val, c.val FROM a JOIN b ON (a.key = b.key1) JOIN c ON (c.key = b.key2)
-```
-
-在计算连接时，涉及两个 map/reduce jobs。第一个 job 连接 a 和 b，并缓存 a 的值，同时 b 的值在 reducer 中流动。其中的第二个 job 缓存第一个连接的结果，同时 c 的值在 reducer 中流动。
-
-也可以使用 hint 指定流动的表，那么其他表就被缓存。
-
-```sql
-SELECT /*+ STREAMTABLE(a) */ a.val, b.val, c.val FROM a JOIN b ON (a.key = b.key1) JOIN c ON (c.key = b.key1)
-```
-
-更多join优化点 [这里](https://github.com/ZGG2016/hive-website/blob/master/User%20Documentation/Hive%20SQL%20Language%20Manual/Joins.md)
-
-
 
 
 ## groupby代替distinct去重
@@ -142,9 +68,7 @@ SELECT /*+ STREAMTABLE(a) */ a.val, b.val, c.val FROM a JOIN b ON (a.key = b.key
 
 [点这里](https://github.com/ZGG2016/knowledgesystem/blob/master/03%20%E5%A4%A7%E6%95%B0%E6%8D%AE/02%20Hive/%E8%B0%93%E8%AF%8D%E4%B8%8B%E6%8E%A8%E6%B5%8B%E8%AF%95.md) 查看详情
 
-## 分区分桶
 
-[点这里](https://github.com/ZGG2016/knowledgesystem/blob/master/03%20%E5%A4%A7%E6%95%B0%E6%8D%AE/02%20Hive/%E5%88%86%E5%8C%BA%E5%88%86%E6%A1%B6.md) 查看详情
 
 ## 合理设置map数
 

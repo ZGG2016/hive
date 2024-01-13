@@ -2,8 +2,6 @@
 
 [TOC]
 
-命令行内语句均在hive4.0内执行
-
 - hive.map.aggr
 
 	Whether to use map-side aggregation in Hive Group By queries.
@@ -193,6 +191,8 @@ root@zgg-server:~/data# cat /root/data/t.txt
 
 
 ## 深度理解  [???]
+
+[此文章详细解释了map端聚合机制](http://dev.bizo.com/2013/02/map-side-aggregations-in-apache-hive.html)
 
 - hive.groupby.mapaggr.checkinterval
 
