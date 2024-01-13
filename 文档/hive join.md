@@ -60,11 +60,9 @@ INFO  : Starting Job = job_1705117733491_0007, Tracking URL = http://zgg-server:
 SELECT a.v1, b.v1, c.v1 FROM a JOIN b ON (a.k1 = b.k1) JOIN c ON (c.k1 = b.k2);
 ```
 
-
-
 join 出现在 WHERE 子句之前。
 
-因此，如果要限制 join 的输出，在 WHERE 子句中限制，否则应该放在 join 子句中。
+因此，如果要限制 join 的输出，在 WHERE 子句中限制，否则应该放在 join 子句中。【内连接join不受影响】
 
 ```sql
 set hive.auto.convert.join=false;

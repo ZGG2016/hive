@@ -10,12 +10,17 @@
 
 [map端聚合](https://github.com/ZGG2016/hive/blob/master/%E6%96%87%E6%A1%A3/map%E7%AB%AF%E8%81%9A%E5%90%88.md)
 
-[大小表join-mapjoin]()
+[大小表join-mapjoin](https://github.com/ZGG2016/hive/blob/master/%E6%96%87%E6%A1%A3/hive%20map%20join.md)
 
-[大大表join-smbjoin]()
+[大大表join-smbjoin](https://github.com/ZGG2016/hive/blob/master/%E6%96%87%E6%A1%A3/hive%20map%20join.md)
 
 [分区分桶](https://github.com/ZGG2016/hive/blob/master/%E6%96%87%E6%A1%A3/%E5%88%86%E5%8C%BA%E5%88%86%E6%A1%B6.md)
 
+[谓词下推]()
+
+列裁剪
+
+[join数据倾斜]()
 
 ## join数据倾斜优化
 
@@ -56,17 +61,6 @@ set hive.skewjoin.mapjoin.map.tasks=10000;
 
 尽量避免笛卡尔积，join 的时候不加 on 条件，或者无效的 on 条件，Hive 只能使用 1 个 reducer 来完成笛卡尔积。
 
-## 列过滤
-
-在 SELECT 中，只拿需要的列，如果有分区，尽量使用分区过滤，少用 `SELECT *`。
-
-## 行过滤（谓词下推）
-
-对表过滤后，再join
-
-对应逻辑优化器是 PredicatePushDown，配置项为 `hive.optimize.ppd`，默认为 true。
-
-[点这里](https://github.com/ZGG2016/knowledgesystem/blob/master/03%20%E5%A4%A7%E6%95%B0%E6%8D%AE/02%20Hive/%E8%B0%93%E8%AF%8D%E4%B8%8B%E6%8E%A8%E6%B5%8B%E8%AF%95.md) 查看详情
 
 
 
