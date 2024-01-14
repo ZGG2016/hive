@@ -163,7 +163,7 @@ ERROR : /tmp/root/hive.log
 ERROR : FAILED: Execution Error, return code 1 from org.apache.hadoop.hive.ql.exec.mr.MapredLocalTask
 ```
 
-对于内连接，在 join 的每个 map/reduce 阶段，序列中的最后一个表通过 reducers 流动，而其他表被缓存。【下例中，表a被广播到mapper中缓存，表b在各自的内存中join表a】
+对于内连接，在 join 的每个 map/reduce 阶段，序列中的最后一个表通过 reducers 流动，而其他表被缓存。【下例中，表a被广播缓存，表b在各自的内存中join表a】
 
 因此，通过组织表，将最大的表出现在序列的最后，它有助于减少 reducer 中为连接键的特定值而缓冲行所需的内存。【把被广播的表（小表）放前面，大表放后面】
 
@@ -438,7 +438,7 @@ ERROR : FAILED: Execution Error, return code 1 from org.apache.hadoop.hive.ql.ex
 |             1 _col0 (type: int)                    |
 ```
 
-mapjoin不支持的一些特性
+mapjoin不支持的一些特性（下面仅列出部分）
 
 ```sql
 -- Union Followed by a MapJoin

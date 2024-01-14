@@ -16,33 +16,25 @@
 
 [分区分桶](https://github.com/ZGG2016/hive/blob/master/%E6%96%87%E6%A1%A3/%E5%88%86%E5%8C%BA%E5%88%86%E6%A1%B6.md)
 
-[谓词下推]()
-
-列裁剪
+[谓词下推](https://github.com/ZGG2016/hive/blob/master/%E6%96%87%E6%A1%A3/%E8%B0%93%E8%AF%8D%E4%B8%8B%E6%8E%A8.md)
 
 [join数据倾斜]()
 
-## join数据倾斜优化
+[groupby数据倾斜]()
 
-由于 join 出现的数据倾斜，那么请做如下设置：
+[并行执行]()
 
-```
-# join 的键对应的记录条数超过这个值则会进行分拆，值根据具体数据量设置
-set hive.skewjoin.key=100000;
+## 列裁剪和分区裁剪
 
-# 如果是 join 过程出现倾斜应该设置为 true
-set hive.optimize.skewjoin=false;
-```
+通过配置项 `hive.optimize.cp` 和 `hive.optimize.pruner`，分别进行列裁剪和分区裁剪，避免全列扫描和全表扫描。
 
-如果开启了，在 join 过程中 Hive 会将计数超过阈值 `hive.skewjoin.key`（默认 100000）的倾斜 key 对应的行临时写进文件中，
+`hive.optimize.cp` 在 hive0.13.0 被移除。
 
-然后再启动另一个 job 做 map join 生成结果。
+## 优化 SQL 来处理 join 数据倾斜：
 
-通过 `hive.skewjoin.mapjoin.map.tasks` 参数还可以控制第二个 job 的 mapper 数量，默认 10000。
-
-```
-set hive.skewjoin.mapjoin.map.tasks=10000;
-```
+- 若不需要空值数据，就提前写where语句过滤掉。需要保留的话，将空值key用随机方式打散。
+- 如果倾斜的 key 很少，将它们抽样出来，对应的行单独存入临时表中，然后打上一个较小的随机数前缀（比如0~9），最后再进行聚合。
+- 如果小表的数据量也很大，可以利用大表的限制条件，削减小表的数据量，再使用 map join 解决。
 
 
 ## groupby代替distinct去重
@@ -53,16 +45,9 @@ set hive.skewjoin.mapjoin.map.tasks=10000;
 
 要确保数据量大到启动 job 的负载远小于计算耗时，才考虑这种方法。
 
-## groupby数据倾斜优化
-
-当 group by 时，配置 `hive.groupby.skewindata` ，处理某些 key 对应的数据量过大，发生数据倾斜的情况。
-
 ## 避免笛卡尔积
 
 尽量避免笛卡尔积，join 的时候不加 on 条件，或者无效的 on 条件，Hive 只能使用 1 个 reducer 来完成笛卡尔积。
-
-
-
 
 ## 合理设置map数
 
@@ -131,15 +116,6 @@ HiveInputFormat 没有对小文件合并功能。
     set mapreduce.job.reduces = 15;
 
 如果设置为-1，那么就会使用第一个方法设置 reduce 个数
-
-## 并行执行
-
-有些阶段可能并非完全互相依赖的，也就是说有些阶段是可以并行执行的，就可以设置如下参数开启并行执行。
-
-    set hive.exec.parallel=true; //打开任务并行执行
-    set hive.exec.parallel.thread.number=16; //同一个 sql 允许最大并行度，默认为8。
-
-当然，得是在系统资源比较空闲的时候才有优势，否则，没资源，并行也起不来。
 
 ## 严格模式
 
@@ -254,15 +230,6 @@ hive> explain cbo cost select customer_key, sum(total_amount) amount from sales 
 
 使用 sort by 替代 order by，这样数据可以分发到多个 reducer 处理。
 
-## 列裁剪和分区裁剪
-
-通过配置项 `hive.optimize.cp` 和 `hive.optimize.pruner`，分别进行列裁剪和分区裁剪，避免全列扫描和全表扫描。
-
-## 优化 SQL 来处理 join 数据倾斜：
-
-- 若不需要空值数据，就提前写where语句过滤掉。需要保留的话，将空值key用随机方式打散。
-- 如果倾斜的 key 很少，将它们抽样出来，对应的行单独存入临时表中，然后打上一个较小的随机数前缀（比如0~9），最后再进行聚合。
-- 如果小表的数据量也很大，可以利用大表的限制条件，削减小表的数据量，再使用 map join 解决。
 
 ## 采用合适的存储格式
 
