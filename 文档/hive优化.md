@@ -18,11 +18,11 @@
 
 [谓词下推](https://github.com/ZGG2016/hive/blob/master/%E6%96%87%E6%A1%A3/%E8%B0%93%E8%AF%8D%E4%B8%8B%E6%8E%A8.md)
 
-[join数据倾斜]()
+[join数据倾斜](https://github.com/ZGG2016/hive/blob/master/%E6%96%87%E6%A1%A3/join%E6%95%B0%E6%8D%AE%E5%80%BE%E6%96%9C.md)
 
-[groupby数据倾斜]()
+[groupby数据倾斜](https://github.com/ZGG2016/hive/blob/master/%E6%96%87%E6%A1%A3/groupby%E6%95%B0%E6%8D%AE%E5%80%BE%E6%96%9C.md)
 
-[并行执行]()
+[并行执行](https://github.com/ZGG2016/hive/blob/master/%E6%96%87%E6%A1%A3/%E5%B9%B6%E8%A1%8C%E6%89%A7%E8%A1%8C.md)
 
 ## 列裁剪和分区裁剪
 

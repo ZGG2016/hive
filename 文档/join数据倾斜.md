@@ -416,3 +416,5 @@ set hive.optimize.skewjoin.compiletime=true;
 +----------------------------------------------------+
 
 ```
+
+[参考理解](https://blog.csdn.net/weixin_46389691/article/details/132620702)
