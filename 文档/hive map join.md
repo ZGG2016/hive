@@ -554,62 +554,102 @@ INFO  : Starting task [Stage-1:MAPRED] in serial mode
 如果要连接的表在连接列上进行分桶，并且一个表中的桶数是另一个表中桶数的倍数，那么这些桶可以相互连接。
 
 ```sql
-0: jdbc:hive2://localhost:10000> show create table order_table_buckets_2;
-+----------------------------------------------------+
-|                   createtab_stmt                   |
-+----------------------------------------------------+
-| CREATE EXTERNAL TABLE `order_table_buckets_2`(     |
-|   `order_id` int,                                  |
-|   `product_name` string,                           |
-|   `price` int)                                     |
-| PARTITIONED BY (                                   |
-|   `deal_day` string)                               |
-| CLUSTERED BY (                                     |
-|   order_id)                                        |
-| SORTED BY (                                        |
-|   price ASC)                                       |
-| INTO 4 BUCKETS           
-...
+create table ratings_p(uid int, mid int, rating double, rating_time string) 
+partitioned by (deal_day string) 
+clustered by (mid) sorted by(mid) into 4 buckets
+row format delimited fields terminated by ',';
 
-0: jdbc:hive2://localhost:10000> show create table order_table_buckets;
-+----------------------------------------------------+
-|                   createtab_stmt                   |
-+----------------------------------------------------+
-| CREATE EXTERNAL TABLE `order_table_buckets_2`(     |
-|   `order_id` int,                                  |
-|   `product_name` string,                           |
-|   `price` int)                                     |
-| PARTITIONED BY (                                   |
-|   `deal_day` string)                               |
-| CLUSTERED BY (                                     |
-|   order_id)                                        |
-| SORTED BY (                                        |
-|   price ASC)                                       |
-| INTO 4 BUCKETS           
+create table movies_p(mid int, title string, genres string) 
+partitioned by (deal_day string) 
+clustered by (mid) sorted by(mid) into 4 buckets
+row format delimited fields terminated by ',';
+
+0: jdbc:hive2://zgg-server:10000> insert into ratings_p select * from ratings;
 ...
+25,000,096 rows affected (425.822 seconds)
+
+0: jdbc:hive2://zgg-server:10000> insert into movies_p partition(deal_day='2022') select * from movies;
+...
+62,424 rows affected (128.477 seconds)
+
 
 -- 设置这个属性，那么处理 A 的桶 1 的 mapper 只会获取 b 的桶 1
 0: jdbc:hive2://localhost:10000> set hive.optimize.bucketmapjoin = true;
 
-0: jdbc:hive2://localhost:10000> select a.*,b.* from order_table_buckets a join order_table_buckets_2 b on a.order_id=b.order_id;
-+-------------+-----------------+----------+-------------+-------------+-----------------+----------+-------------+
-| a.order_id  | a.product_name  | a.price  | a.deal_day  | b.order_id  | b.product_name  | b.price  | b.deal_day  |
-+-------------+-----------------+----------+-------------+-------------+-----------------+----------+-------------+
-| 9           | book            | 30       | 201901      | 9           | book            | 30       | 201901      |
-| 11          | book4           | 45       | 201901      | 11          | book4           | 45       | 201901      |
-| 13          | book6           | 145      | 201901      | 13          | book6           | 145      | 201901      |
-| 8           | liquor          | 150      | 201901      | 8           | liquor          | 150      | 201901      |
-| 1           | bicycle         | 1000     | 201901      | 1           | bicycle         | 1000     | 201901      |
-| 4           | tv              | 3000     | 201901      | 4           | tv              | 3000     | 201901      |
-| 6           | banana          | 8        | 201901      | 6           | banana          | 8        | 201901      |
-| 10          | book2           | 40       | 201901      | 10          | book2           | 40       | 201901      |
-| 7           | milk            | 70       | 201901      | 7           | milk            | 70       | 201901      |
-| 2           | truck           | 20000    | 201901      | 2           | truck           | 20000    | 201901      |
-| 5           | apple           | 10       | 201901      | 5           | apple           | 10       | 201901      |
-| 12          | book5           | 75       | 201901      | 12          | book5           | 75       | 201901      |
-| 3           | cellphone       | 2000     | 201901      | 3           | cellphone       | 2000     | 201901      |
-+-------------+-----------------+----------+-------------+-------------+-----------------+----------+-------------+
-
+0: jdbc:hive2://zgg-server:10000> explain select a.*,b.* from movies_p a join ratings_p b on a.mid=b.mid;
++----------------------------------------------------+
+|                      Explain                       |
++----------------------------------------------------+
+| STAGE DEPENDENCIES:                                |
+|   Stage-4 is a root stage                          |
+|   Stage-3 depends on stages: Stage-4               |
+|   Stage-0 depends on stages: Stage-3               |
+|                                                    |
+| STAGE PLANS:                                       |
+|   Stage: Stage-4                                   |
+|     Map Reduce Local Work                          |
+|       Alias -> Map Local Tables:                   |
+|         $hdt$_0:a                                  |
+|           Fetch Operator                           |
+|             limit: -1                              |
+|       Alias -> Map Local Operator Tree:            |
+|         $hdt$_0:a                                  |
+|           TableScan                                |
+|             alias: a                               |
+|             filterExpr: mid is not null (type: boolean) |
+|             Statistics: Num rows: 62424 Data size: 24532632 Basic stats: COMPLETE Column stats: COMPLETE |
+|             Filter Operator                        |
+|               predicate: mid is not null (type: boolean) |
+|               Statistics: Num rows: 62423 Data size: 24532239 Basic stats: COMPLETE Column stats: COMPLETE |
+|               Select Operator                      |
+|                 expressions: mid (type: int), title (type: string), genres (type: string), deal_day (type: string) |
+|                 outputColumnNames: _col0, _col1, _col2, _col3 |
+|                 Statistics: Num rows: 62423 Data size: 24532239 Basic stats: COMPLETE Column stats: COMPLETE |
+|                 HashTable Sink Operator            |
+|                   keys:                            |
+|                     0 _col0 (type: int)            |
+|                     1 _col1 (type: int)            |
+|                                                    |
+|   Stage: Stage-3                                   |
+|     Map Reduce                                     |
+|       Map Operator Tree:                           |
+|           TableScan                                |
+|             alias: b                               |
+|             filterExpr: mid is not null (type: boolean) |
+|             Statistics: Num rows: 25000096 Data size: 7350028224 Basic stats: COMPLETE Column stats: COMPLETE |
+|             Filter Operator                        |
+|               predicate: mid is not null (type: boolean) |
+|               Statistics: Num rows: 25000095 Data size: 7350027930 Basic stats: COMPLETE Column stats: COMPLETE |
+|               Select Operator                      |
+|                 expressions: uid (type: int), mid (type: int), rating (type: double), rating_time (type: string), deal_day (type: string) |
+|                 outputColumnNames: _col0, _col1, _col2, _col3, _col4 |
+|                 Statistics: Num rows: 25000095 Data size: 7350027930 Basic stats: COMPLETE Column stats: COMPLETE |
+|                 Map Join Operator                  |
+|                   condition map:                   |
+|                        Inner Join 0 to 1           |
+|                   keys:                            |
+|                     0 _col0 (type: int)            |
+|                     1 _col1 (type: int)            |
+|                   outputColumnNames: _col0, _col1, _col2, _col3, _col4, _col5, _col6, _col7, _col8 |
+|                   Statistics: Num rows: 24999695 Data size: 17174790465 Basic stats: COMPLETE Column stats: COMPLETE |
+|                   File Output Operator             |
+|                     compressed: false              |
+|                     Statistics: Num rows: 24999695 Data size: 17174790465 Basic stats: COMPLETE Column stats: COMPLETE |
+|                     table:                         |
+|                         input format: org.apache.hadoop.mapred.SequenceFileInputFormat |
+|                         output format: org.apache.hadoop.hive.ql.io.HiveSequenceFileOutputFormat |
+|                         serde: org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe |
+|       Execution mode: vectorized                   |
+|       Local Work:                                  |
+|         Map Reduce Local Work                      |
+|                                                    |
+|   Stage: Stage-0                                   |
+|     Fetch Operator                                 |
+|       limit: -1                                    |
+|       Processor Tree:                              |
+|         ListSink                                   |
+|                                                    |
++----------------------------------------------------+
 ```
 
 如果要连接的表在连接列上进行了排序和存储，并且它们具有相同数量的桶，则可以执行 sort-merge join。对应的桶在 mapper 上相互连接
@@ -621,6 +661,70 @@ INFO  : Starting task [Stage-1:MAPRED] in serial mode
 
 0: jdbc:hive2://localhost:10000> set hive.optimize.bucketmapjoin.sortedmerge = true;
 
-select a.*,b.* from order_table_buckets a join (select * from order_table_buckets_2 order by order_id)b on a.order_id=b.order_id;
+-- 大表选择策略帮助确定选择哪个表流动（另一个表被广播缓存）  数据量大的流动
+0: jdbc:hive2://zgg-server:10000> set hive.auto.convert.sortmerge.join.bigtable.selection.policy=org.apache.hadoop.hive.ql.optimizer.TableSizeBasedBigTableSelectorForAutoSMJ
+
+0: jdbc:hive2://zgg-server:10000> explain cbo select a.*,b.* from movies_p a join ratings_p b on a.mid=b.mid;
++----------------------------------------------------+
+|                      Explain                       |
++----------------------------------------------------+
+| CBO PLAN:                                          |
+| HiveJoin(condition=[=($0, $5)], joinType=[inner], algorithm=[none], cost=[not available]) |
+|   HiveProject(mid=[$0], title=[$1], genres=[$2], deal_day=[$3]) |
+|     HiveFilter(condition=[IS NOT NULL($0)])        |
+|       HiveTableScan(table=[[default, movies_p]], table:alias=[a]) |
+|   HiveProject(uid=[$0], mid=[$1], rating=[$2], rating_time=[$3], deal_day=[$4]) |
+|     HiveFilter(condition=[IS NOT NULL($1)])        |
+|       HiveTableScan(table=[[default, ratings_p]], table:alias=[b]) |
+|                                                    |
++----------------------------------------------------+
+
+
+0: jdbc:hive2://zgg-server:10000> explain select a.*,b.* from movies_p a join ratings_p b on a.mid=b.mid;
++----------------------------------------------------+
+|                      Explain                       |
++----------------------------------------------------+
+| STAGE DEPENDENCIES:                                |
+|   Stage-1 is a root stage                          |
+|   Stage-0 depends on stages: Stage-1               |
+|                                                    |
+| STAGE PLANS:                                       |
+|   Stage: Stage-1                                   |
+|     Map Reduce                                     |
+|       Map Operator Tree:                           |
+|           TableScan                                |
+|             alias: b                               |
+|             filterExpr: mid is not null (type: boolean) |
+|             Statistics: Num rows: 25000096 Data size: 7350028224 Basic stats: COMPLETE Column stats: COMPLETE |
+|             Filter Operator                        |
+|               predicate: mid is not null (type: boolean) |
+|               Statistics: Num rows: 25000095 Data size: 7350027930 Basic stats: COMPLETE Column stats: COMPLETE |
+|               Select Operator                      |
+|                 expressions: uid (type: int), mid (type: int), rating (type: double), rating_time (type: string), deal_day (type: string) |
+|                 outputColumnNames: _col0, _col1, _col2, _col3, _col4 |
+|                 Statistics: Num rows: 25000095 Data size: 7350027930 Basic stats: COMPLETE Column stats: COMPLETE |
+|                 Sorted Merge Bucket Map Join Operator |  【这里】
+|                   condition map:                   |
+|                        Inner Join 0 to 1           |
+|                   keys:                            |
+|                     0 _col0 (type: int)            |
+|                     1 _col1 (type: int)            |
+|                   outputColumnNames: _col0, _col1, _col2, _col3, _col4, _col5, _col6, _col7, _col8 |
+|                   Statistics: Num rows: 27500105 Data size: 8085030898 Basic stats: COMPLETE Column stats: NONE |
+|                   File Output Operator             |
+|                     compressed: false              |
+|                     Statistics: Num rows: 27500105 Data size: 8085030898 Basic stats: COMPLETE Column stats: NONE |
+|                     table:                         |
+|                         input format: org.apache.hadoop.mapred.SequenceFileInputFormat |
+|                         output format: org.apache.hadoop.hive.ql.io.HiveSequenceFileOutputFormat |
+|                         serde: org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe |
+|                                                    |
+|   Stage: Stage-0                                   |
+|     Fetch Operator                                 |
+|       limit: -1                                    |
+|       Processor Tree:                              |
+|         ListSink                                   |
+|                                                    |
++----------------------------------------------------+
 ```
 

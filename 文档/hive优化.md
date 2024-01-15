@@ -24,6 +24,29 @@
 
 [并行执行](https://github.com/ZGG2016/hive/blob/master/%E6%96%87%E6%A1%A3/%E5%B9%B6%E8%A1%8C%E6%89%A7%E8%A1%8C.md)
 
+[多重模式](https://github.com/ZGG2016/hive/blob/master/%E6%96%87%E6%A1%A3/groupby%E5%AD%90%E5%8F%A5.md)
+
+[控制map和reduce的数量]()
+
+[CBO优化]()
+
+## CBO优化
+
+Hive 在提供最终执行前，根据统计信息，选择代价最小的执行计划。(hive4.0.0版本开始)
+
+```
+set hive.cbo.enable=true;
+set hive.compute.query.using.stats=true;
+set hive.stats.fetch.column.stats=true;
+set hive.stats.fetch.partition.stats=true;
+```
+
+```sql
+hive> explain cbo cost select customer_key, sum(total_amount) amount from sales group by customer_key;
+```
+
+[点击](https://github.com/ZGG2016/hive-website/blob/master/User%20Documentation/Hive%20SQL%20Language%20Manual/explain%20plan.md#12the-cbo-clause) 查看更多
+
 ## 列裁剪和分区裁剪
 
 通过配置项 `hive.optimize.cp` 和 `hive.optimize.pruner`，分别进行列裁剪和分区裁剪，避免全列扫描和全表扫描。
@@ -48,74 +71,6 @@
 ## 避免笛卡尔积
 
 尽量避免笛卡尔积，join 的时候不加 on 条件，或者无效的 on 条件，Hive 只能使用 1 个 reducer 来完成笛卡尔积。
-
-## 合理设置map数
-
-（1）复杂文件增加 Map 数
-
-当 input 的文件都很大，任务逻辑复杂，map 执行非常慢的时候，可以考虑增加 Map 数，来使得每个 map 处理的数据量减少，从而提高任务的执行效率。
-
-增加 map 的方法为：
-
-    map输入的最大的分片大小
-    mapreduce.input.fileinputformat.split.maxsize [mapred-site.xml]
-
-    map输入的最小的分片大小，默认是0
-    mapreduce.input.fileinputformat.split.minsize [mapred-site.xml]
-
-    protected long computeSplitSize(long blockSize, long minSize,
-                                   long maxSize) {
-      return Math.max(minSize, Math.min(maxSize, blockSize));
-    }
-
-调整 maxSize ，让 maxSize 最大值低于 blocksize 就可以增加 map 的个数
-
-    mapreduce.input.fileinputformat.split.maxsize
-
-（2）小文件进行合并
-
-在 map 执行前合并小文件，减少 map 数：CombineHiveInputFormat 具有对小文件进行合
-并的功能（系统默认的格式）。
-
-HiveInputFormat 没有对小文件合并功能。
-
-    set hive.input.format=org.apache.hadoop.hive.ql.io.CombineHiveInputFormat;
-
-在 Map-Reduce 的任务结束时合并小文件的设置：
-
-    在 map-only 任务结束时合并小文件，默认 true
-    SET hive.merge.mapfiles = true;
-    
-    在 map-reduce 任务结束时合并小文件，默认 false
-    SET hive.merge.mapredfiles = true;
-    
-    合并文件的大小，默认 256M
-    SET hive.merge.size.per.task = 268435456;
-
-    当输出文件的平均大小小于该值时，启动一个独立的 map-reduce 任务进行文件 merge
-    SET hive.merge.smallfiles.avgsize = 16777216;
-
-## 合理设置reduce数
-
-（1）调整 reduce 个数方法一
-
-    每个 Reduce 处理的数据量默认是 256MB
-    hive.exec.reducers.bytes.per.reducer=256000000
-    
-    每个任务最大的 reduce 数，默认为 1009
-    hive.exec.reducers.max=1009
-    
-    计算 reducer 数的公式
-    N=min(参数 2，总输入数据量/参数 1)
-
-（2）调整 reduce 个数方法二
-
-在 hadoop 的 mapred-default.xml 文件中修改
-
-    设置每个 job 的 Reduce 个数
-    set mapreduce.job.reduces = 15;
-
-如果设置为-1，那么就会使用第一个方法设置 reduce 个数
 
 ## 严格模式
 
@@ -191,40 +146,6 @@ Execution mode: vectorized
 
 [点这里](https://github.com/ZGG2016/hive-website/blob/master/Resources%20for%20Contributors/Hive%20Design%20Docs/Vectorized%20Query%20Execution.md) 查看详情
 
-## 多重模式
-
-存在多条sql语句，它们都从同一个表进行扫描，但是做不同的逻辑，那么就可以一次读取，多次使用。
-
-```sql
-insert int t_ptn partition(city=A). select id,name,sex, age from student
-where city= A;
-insert int t_ptn partition(city=B). select id,name,sex, age from student
-where city= B;
-insert int t_ptn partition(city=c). select id,name,sex, age from student
-where city= c;
-
-修改为：
-from student
-insert int t_ptn partition(city=A) select id,name,sex, age where city= A
-insert int t_ptn partition(city=B) select id,name,sex, age where city= B
-```
-
-## CBO优化
-
-Hive 在提供最终执行前，根据统计信息，选择代价最小的执行计划。(hive4.0.0版本开始)
-
-```
-set hive.cbo.enable=true;
-set hive.compute.query.using.stats=true;
-set hive.stats.fetch.column.stats=true;
-set hive.stats.fetch.partition.stats=true;
-```
-
-```sql
-hive> explain cbo cost select customer_key, sum(total_amount) amount from sales group by customer_key;
-```
-
-[点击](https://github.com/ZGG2016/hive-website/blob/master/User%20Documentation/Hive%20SQL%20Language%20Manual/explain%20plan.md#12the-cbo-clause) 查看更多
 
 ## 使用 sort by 替代 order by
 
