@@ -2,6 +2,8 @@
 
 [TOC]
 
+先阅读 [这里](https://github.com/ZGG2016/hive-website/blob/master/User%20Documentation/Hive%20SQL%20Language%20Manual/explain%20plan.md)
+
 最重要的是：根据当前使用的环境，执行explain语句，分析查询语句的执行逻辑，从而辅助优化查询语句。
 
 ## explain
@@ -312,11 +314,3 @@ Annotates the plan with actual row counts. Since in Hive 2.2.0 (HIVE-14362)
 |                                                    |
 +----------------------------------------------------+
 ```
-
-```sql
-EXPLAIN DEPENDENCY
-EXPLAIN AUTHORIZATION
-EXPLAIN LOCKS
-```
-
-更多介绍 [点这里](https://github.com/ZGG2016/hive-website/blob/master/User%20Documentation/Hive%20SQL%20Language%20Manual/explain%20plan.md)

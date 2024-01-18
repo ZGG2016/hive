@@ -140,7 +140,7 @@ tblproperties("parquet.compression"="SNAPPY");
 
 压缩方式一般选择 snappy 或 lzo
 
-**[点这里](https://github.com/ZGG2016/hive-website/blob/master/User%20Documentation/Hive%20SQL%20Language%20Manual/0%E7%9B%AE%E5%BD%95.md) 查看其他文件格式和压缩**
+**[点这里](https://github.com/ZGG2016/hive/blob/master/%E5%AE%98%E6%96%B9%E6%96%87%E6%A1%A3%E8%AF%91%E6%96%87/User%20Documentation/Hive%20SQL%20Language%20Manual/0%E7%9B%AE%E5%BD%95.md) 查看其他文件格式和压缩**
 
 --------------------------
 来自：[尚硅谷hive教程](https://www.bilibili.com/video/BV1EZ4y1G7iL)
