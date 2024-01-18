@@ -26,39 +26,39 @@
 
 [多重模式](https://github.com/ZGG2016/hive/blob/master/%E6%96%87%E6%A1%A3/groupby%E5%AD%90%E5%8F%A5.md)
 
-[控制map和reduce的数量]()
+[控制map和reduce的数量](https://github.com/ZGG2016/hive/blob/master/%E6%96%87%E6%A1%A3/hive%E6%8E%A7%E5%88%B6map%E5%92%8Creduce%E7%9A%84%E6%95%B0%E9%87%8F.md)
 
 [CBO优化]()
 
-## CBO优化
+[向量化查询]()
 
-Hive 在提供最终执行前，根据统计信息，选择代价最小的执行计划。(hive4.0.0版本开始)
+## 向量化查询
 
-```
-set hive.cbo.enable=true;
-set hive.compute.query.using.stats=true;
-set hive.stats.fetch.column.stats=true;
-set hive.stats.fetch.partition.stats=true;
-```
+标准的查询执行系统每次处理一行，
+
+向量化查询执行通过一次处理 1024 行数据的块简化了操作。在块中，每个列都存储为向量(一个基本数据类型的数组)。
+
+首先以 ORC 格式存储数据，然后启用
+
+    set hive.vectorized.execution.enabled = true;
+    set hive.vectorized.execution.reduce.enabled = true;
+
+在 explain 展示的执行计划中出现如下内容，就表示使用了向量化查询
 
 ```sql
-hive> explain cbo cost select customer_key, sum(total_amount) amount from sales group by customer_key;
+hive (default)> explain select count(id) from vectorizedtable group by state;
+....
+Execution mode: vectorized
+....
 ```
 
-[点击](https://github.com/ZGG2016/hive-website/blob/master/User%20Documentation/Hive%20SQL%20Language%20Manual/explain%20plan.md#12the-cbo-clause) 查看更多
+[点这里](https://github.com/ZGG2016/hive-website/blob/master/Resources%20for%20Contributors/Hive%20Design%20Docs/Vectorized%20Query%20Execution.md) 查看详情
 
 ## 列裁剪和分区裁剪
 
 通过配置项 `hive.optimize.cp` 和 `hive.optimize.pruner`，分别进行列裁剪和分区裁剪，避免全列扫描和全表扫描。
 
 `hive.optimize.cp` 在 hive0.13.0 被移除。
-
-## 优化 SQL 来处理 join 数据倾斜：
-
-- 若不需要空值数据，就提前写where语句过滤掉。需要保留的话，将空值key用随机方式打散。
-- 如果倾斜的 key 很少，将它们抽样出来，对应的行单独存入临时表中，然后打上一个较小的随机数前缀（比如0~9），最后再进行聚合。
-- 如果小表的数据量也很大，可以利用大表的限制条件，削减小表的数据量，再使用 map join 解决。
-
 
 ## groupby代替distinct去重
 
@@ -116,37 +116,6 @@ hive> explain cbo cost select customer_key, sum(total_amount) amount from sales 
 
 ## 压缩
 
-[点这里](https://github.com/ZGG2016/knowledgesystem/blob/master/03%20%E5%A4%A7%E6%95%B0%E6%8D%AE/02%20Hive/hive%20%E5%8E%8B%E7%BC%A9%E4%BD%BF%E7%94%A8.md) 查看详情
-
-## 更换引擎
-
-使用tez或spark
-
-[点这里](https://github.com/ZGG2016/knowledgesystem/blob/master/03%20%E5%A4%A7%E6%95%B0%E6%8D%AE/02%20Hive/tez%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA.md) 查看详情
-
-## 向量化查询
-
-标准的查询执行系统每次处理一行，
-
-向量化查询执行通过一次处理 1024 行数据的块简化了操作。在块中，每个列都存储为向量(一个基本数据类型的数组)。
-
-首先以 ORC 格式存储数据，然后启用
-
-    set hive.vectorized.execution.enabled = true;
-    set hive.vectorized.execution.reduce.enabled = true;
-
-在 explain 展示的执行计划中出现如下内容，就表示使用了向量化查询
-
-```sql
-hive (default)> explain select count(id) from vectorizedtable group by state;
-....
-Execution mode: vectorized
-....
-```
-
-[点这里](https://github.com/ZGG2016/hive-website/blob/master/Resources%20for%20Contributors/Hive%20Design%20Docs/Vectorized%20Query%20Execution.md) 查看详情
-
-
 ## 使用 sort by 替代 order by
 
 使用 sort by 替代 order by，这样数据可以分发到多个 reducer 处理。
@@ -154,7 +123,6 @@ Execution mode: vectorized
 
 ## 采用合适的存储格式
 
-[点击](https://github.com/ZGG2016/knowledgesystem/blob/master/03%20%E5%A4%A7%E6%95%B0%E6%8D%AE/02%20Hive/hive%20%E4%B8%AD%E4%BD%BF%E7%94%A8%E4%B8%8D%E5%90%8C%E7%9A%84%E6%96%87%E4%BB%B6%E5%AD%98%E5%82%A8%E6%A0%BC%E5%BC%8F.md) 查看更多
 
 --------------------------------------
 
