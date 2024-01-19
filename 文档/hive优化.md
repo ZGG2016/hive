@@ -34,7 +34,7 @@
 
 [严格模式](https://github.com/ZGG2016/hive/blob/master/%E6%96%87%E6%A1%A3/%E4%B8%A5%E6%A0%BC%E6%A8%A1%E5%BC%8F.md)
 
-[相关性优化器]()
+[相关性优化器](https://github.com/ZGG2016/hive/blob/master/%E6%96%87%E6%A1%A3/%E7%9B%B8%E5%85%B3%E6%80%A7%E4%BC%98%E5%8C%96%E5%99%A8.md)
 
 ## 列裁剪和分区裁剪
 
