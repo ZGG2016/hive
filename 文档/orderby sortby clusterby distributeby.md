@@ -193,7 +193,7 @@ INFO  : Completed executing command(queryId=root_20240118110354_7f3d37f2-250f-45
 select * from ratings order by desc NULLS FIRST;
 ```
 
-其他特性见 [严格模式文档]()
+其他特性见 [严格模式文档](https://github.com/ZGG2016/hive/blob/master/%E6%96%87%E6%A1%A3/%E4%B8%A5%E6%A0%BC%E6%A8%A1%E5%BC%8F.md)
 
 ## clusterby distributeby
 

@@ -28,11 +28,13 @@
 
 [控制map和reduce的数量](https://github.com/ZGG2016/hive/blob/master/%E6%96%87%E6%A1%A3/hive%E6%8E%A7%E5%88%B6map%E5%92%8Creduce%E7%9A%84%E6%95%B0%E9%87%8F.md)
 
-[CBO优化]()
+[CBO优化](https://github.com/ZGG2016/hive/blob/master/%E6%96%87%E6%A1%A3/cbo%E4%BC%98%E5%8C%96.md)
 
-[向量化查询]()
+[向量化查询](https://github.com/ZGG2016/hive/blob/master/%E6%96%87%E6%A1%A3/%E5%90%91%E9%87%8F%E5%8C%96%E6%9F%A5%E8%AF%A2.md)
 
-[严格模式]()
+[严格模式](https://github.com/ZGG2016/hive/blob/master/%E6%96%87%E6%A1%A3/%E4%B8%A5%E6%A0%BC%E6%A8%A1%E5%BC%8F.md)
+
+[相关性优化器]()
 
 ## 列裁剪和分区裁剪
 
